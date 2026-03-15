@@ -573,7 +573,6 @@ export default function Beacon() {
   const [captionLog,     setCaptionLog]     = useState([]);
   const [fontSize,       setFontSize]       = useState("md");
   const [captionStatus,  setCaptionStatus]  = useState("");
-  const [captionStatus,  setCaptionStatus]  = useState("");
 
   // Sound Visualizer state
   const [soundOn,    setSoundOn]    = useState(false);
@@ -590,9 +589,6 @@ export default function Beacon() {
 
   const captionRecRef    = useRef(null);
   const captionOnRef     = useRef(false);
-  const mediaRecRef      = useRef(null);
-  const audioChunksRef   = useRef([]);
-  const captionMicRef    = useRef(null);
   const mediaRecRef      = useRef(null);
   const audioChunksRef   = useRef([]);
   const captionMicRef    = useRef(null);
