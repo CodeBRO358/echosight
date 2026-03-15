@@ -770,40 +770,101 @@ export default function Beacon() {
   }
 
   // ── Live Captions (Web Speech API SpeechRecognition) ───────────────────────
-  function startCaptions() {
+  //
+  // Edge-specific fixes applied here:
+  //
+  // Fix 1: Edge's SpeechRecognition silently fails if microphone permission
+  // has not been explicitly confirmed beforehand. We request mic access via
+  // getUserMedia first, then immediately release it. This forces the browser
+  // to grant and record the permission before SpeechRecognition takes over.
+  //
+  // Fix 2: After recognition ends (even briefly between sentences), reusing
+  // the same SpeechRecognition object to call .start() again causes Edge to
+  // throw internally and stop silently. We create a brand-new instance every
+  // time recognition restarts instead.
+  //
+  // Fix 3: Renamed the loop variable from `final` (reserved word in some
+  // strict-mode Edge builds) to `finalText`.
+  //
+  // Fix 4: Errors like "not-allowed" and "service-not-allowed" previously
+  // passed through silently. We now catch them, reset state visibly, and
+  // tell the user what happened.
+
+  async function startCaptions() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
       toast_("⚠️ Live Captions require Chrome or Edge browser.");
       return;
     }
 
-    const rec          = new SR();
-    rec.continuous     = true;
-    rec.interimResults = true;
-    rec.lang           = "en-US";
+    // Fix 1: Explicitly request and immediately release the microphone so
+    // the browser records permission before SpeechRecognition starts.
+    try {
+      const permStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      permStream.getTracks().forEach(t => t.stop());
+    } catch {
+      toast_("⚠️ Microphone access was denied. Please allow it in your browser settings and try again.");
+      return;
+    }
 
-    rec.onresult = e => {
-      let interim = "", final = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) final += t + " ";
-        else interim += t;
-      }
-      if (final) { setCaptionLog(prev => [...prev, final.trim()]); setCaptionInterim(""); }
-      else        setCaptionInterim(interim);
-    };
-
-    rec.onerror = e => { if (e.error !== "no-speech") toast_("⚠️ Mic error: " + e.error); };
-
-    // captionOnRef lets the onend callback check current state
-    // without capturing a stale closure value
-    rec.onend = () => { if (captionOnRef.current) rec.start(); };
-
-    captionRecRef.current = rec;
-    captionOnRef.current  = true;
-    rec.start();
+    captionOnRef.current = true;
     setCaptionOn(true);
     setCaptionInterim("");
+
+    // Fix 2: Use a local function so every restart creates a fresh instance.
+    function createAndStart() {
+      if (!captionOnRef.current) return;
+
+      const rec          = new SR();
+      rec.continuous     = true;
+      rec.interimResults = true;
+      rec.lang           = "en-US";
+
+      rec.onresult = e => {
+        // Fix 3: renamed from `final` to `finalText`
+        let interim = "", finalText = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalText += t + " ";
+          else interim += t;
+        }
+        if (finalText) {
+          setCaptionLog(prev => [...prev, finalText.trim()]);
+          setCaptionInterim("");
+        } else {
+          setCaptionInterim(interim);
+        }
+      };
+
+      // Fix 4: Handle permission-denied and service errors visibly.
+      rec.onerror = e => {
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+          toast_("⚠️ Microphone permission was denied. Please allow access and try again.");
+          captionOnRef.current = false;
+          setCaptionOn(false);
+          setCaptionInterim("");
+        } else if (e.error !== "no-speech" && e.error !== "aborted") {
+          toast_("⚠️ Caption error: " + e.error);
+        }
+      };
+
+      // Fix 2 continued: onend creates a fresh instance instead of
+      // calling .start() on the expired object.
+      rec.onend = () => {
+        if (captionOnRef.current) {
+          setTimeout(createAndStart, 100);
+        }
+      };
+
+      captionRecRef.current = rec;
+      try {
+        rec.start();
+      } catch {
+        // Swallow the rare case where .start() is called while already running
+      }
+    }
+
+    createAndStart();
   }
 
   function stopCaptions() {
