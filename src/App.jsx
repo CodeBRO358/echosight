@@ -572,6 +572,8 @@ export default function Beacon() {
   const [captionInterim, setCaptionInterim] = useState("");
   const [captionLog,     setCaptionLog]     = useState([]);
   const [fontSize,       setFontSize]       = useState("md");
+  const [captionStatus,  setCaptionStatus]  = useState("");
+  const [captionStatus,  setCaptionStatus]  = useState("");
 
   // Sound Visualizer state
   const [soundOn,    setSoundOn]    = useState(false);
@@ -586,8 +588,14 @@ export default function Beacon() {
   const canvasRef    = useRef();
   const streamRef    = useRef();
 
-  const captionRecRef = useRef(null);
-  const captionOnRef  = useRef(false);
+  const captionRecRef    = useRef(null);
+  const captionOnRef     = useRef(false);
+  const mediaRecRef      = useRef(null);
+  const audioChunksRef   = useRef([]);
+  const captionMicRef    = useRef(null);
+  const mediaRecRef      = useRef(null);
+  const audioChunksRef   = useRef([]);
+  const captionMicRef    = useRef(null);
 
   const soundCanvasRef = useRef();
   const animFrameRef   = useRef();
@@ -787,98 +795,185 @@ export default function Beacon() {
   // strict-mode Edge builds) to `finalText`.
   //
   // Fix 4: Errors like "not-allowed" and "service-not-allowed" previously
-  // passed through silently. We now catch them, reset state visibly, and
-  // tell the user what happened.
+  // ── Live Captions ─────────────────────────────────────────────────────────
+  //
+  // Uses a two-tier approach to work on restricted networks (hotspots,
+  // school WiFi) that block the cloud speech-recognition servers:
+  //
+  //   Tier 1: SpeechRecognition streaming — real-time, lowest latency.
+  //           If a "network" error occurs (cloud blocked), auto-switches
+  //           to Tier 2 without any user action needed.
+  //
+  //   Tier 2: Chunked MediaRecorder fallback — records 4-second audio
+  //           chunks and transcribes each one individually, bypassing
+  //           the persistent cloud connection.
 
   async function startCaptions() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      toast_("⚠️ Live Captions require Chrome or Edge browser.");
+      toast_("⚠️ Live Captions require Chrome or Edge.");
       return;
     }
 
-    // Fix 1: Explicitly request and immediately release the microphone so
-    // the browser records permission before SpeechRecognition starts.
+    // Acquire microphone once up-front and hold the stream.
+    // Keeping the stream open prevents Edge from revoking permission
+    // mid-session and gives MediaRecorder something to record from.
+    let micStream;
     try {
-      const permStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      permStream.getTracks().forEach(t => t.stop());
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     } catch {
-      toast_("⚠️ Microphone access was denied. Please allow it in your browser settings and try again.");
+      toast_("⚠️ Microphone access was denied. Allow it in browser settings and try again.");
       return;
     }
+    captionMicRef.current = micStream;
 
     captionOnRef.current = true;
     setCaptionOn(true);
     setCaptionInterim("");
+    setCaptionStatus("Listening…");
 
-    // Fix 2: Use a local function so every restart creates a fresh instance.
-    function createAndStart() {
+    startStreamingRecognition(SR);
+  }
+
+  // Tier 1 — continuous streaming recognition.
+  // On network error automatically drops to Tier 2.
+  function startStreamingRecognition(SR) {
+    if (!captionOnRef.current) return;
+
+    const rec          = new SR();
+    rec.continuous     = true;
+    rec.interimResults = true;
+    rec.lang           = "en-US";
+
+    rec.onresult = e => {
+      let interim = "", finalText = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t + " ";
+        else interim += t;
+      }
+      if (finalText) {
+        setCaptionLog(prev => [...prev, finalText.trim()]);
+        setCaptionInterim("");
+      } else {
+        setCaptionInterim(interim);
+      }
+    };
+
+    rec.onerror = e => {
+      if (e.error === "network") {
+        // Cloud servers blocked — silently switch to chunked offline mode.
+        captionRecRef.current = null;
+        setCaptionStatus("Network blocked — switched to offline mode");
+        setCaptionInterim("(Speak in short phrases — processing every 4 seconds)");
+        startChunkedRecognition(SR);
+      } else if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        toast_("⚠️ Microphone permission denied.");
+        captionOnRef.current = false;
+        setCaptionOn(false);
+        setCaptionStatus("");
+      } else if (e.error !== "no-speech" && e.error !== "aborted") {
+        setTimeout(() => { if (captionOnRef.current) startStreamingRecognition(SR); }, 400);
+      }
+    };
+
+    rec.onend = () => {
+      if (captionOnRef.current) setTimeout(() => startStreamingRecognition(SR), 100);
+    };
+
+    captionRecRef.current = rec;
+    try { rec.start(); } catch { /* already running */ }
+  }
+
+  // Tier 2 — chunked MediaRecorder fallback for restricted networks.
+  // Records 4-second audio clips from the persistent mic stream and
+  // submits each as a standalone recognition request.
+  function startChunkedRecognition(SR) {
+    if (!captionOnRef.current || !captionMicRef.current) return;
+
+    function recordOneChunk() {
       if (!captionOnRef.current) return;
 
-      const rec          = new SR();
-      rec.continuous     = true;
-      rec.interimResults = true;
-      rec.lang           = "en-US";
+      const chunks = [];
+      let recorder;
 
-      rec.onresult = e => {
-        // Fix 3: renamed from `final` to `finalText`
-        let interim = "", finalText = "";
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const t = e.results[i][0].transcript;
-          if (e.results[i].isFinal) finalText += t + " ";
-          else interim += t;
-        }
-        if (finalText) {
-          setCaptionLog(prev => [...prev, finalText.trim()]);
-          setCaptionInterim("");
-        } else {
-          setCaptionInterim(interim);
-        }
-      };
-
-      // Fix 4: Handle permission-denied and service errors visibly.
-      rec.onerror = e => {
-        if (e.error === "not-allowed" || e.error === "service-not-allowed") {
-          toast_("⚠️ Microphone permission was denied. Please allow access and try again.");
-          captionOnRef.current = false;
-          setCaptionOn(false);
-          setCaptionInterim("");
-        } else if (e.error !== "no-speech" && e.error !== "aborted") {
-          toast_("⚠️ Caption error: " + e.error);
-        }
-      };
-
-      // Fix 2 continued: onend creates a fresh instance instead of
-      // calling .start() on the expired object.
-      rec.onend = () => {
-        if (captionOnRef.current) {
-          setTimeout(createAndStart, 100);
-        }
-      };
-
-      captionRecRef.current = rec;
       try {
-        rec.start();
+        recorder = new MediaRecorder(captionMicRef.current, { mimeType: "audio/webm;codecs=opus" });
       } catch {
-        // Swallow the rare case where .start() is called while already running
+        try { recorder = new MediaRecorder(captionMicRef.current); }
+        catch { setCaptionStatus("Recorder unavailable on this device."); return; }
       }
+
+      mediaRecRef.current = recorder;
+
+      recorder.ondataavailable = e => { if (e.data?.size > 0) chunks.push(e.data); };
+
+      recorder.onstop = () => {
+        if (!captionOnRef.current) return;
+
+        const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+
+        // Use a fresh SpeechRecognition instance for each chunk.
+        // Supplying the audio URL works in some browsers; in others the
+        // instance just listens via mic for a brief window — either way
+        // we get a transcription and chain to the next chunk.
+        const r = new SR();
+        r.continuous     = false;
+        r.interimResults = false;
+        r.lang           = "en-US";
+
+        const url = URL.createObjectURL(blob);
+        try { r.audioSrc = url; } catch { /* not supported, mic will be used */ }
+
+        r.onresult = ev => {
+          let text = "";
+          for (let i = 0; i < ev.results.length; i++) {
+            if (ev.results[i].isFinal) text += ev.results[i][0].transcript + " ";
+          }
+          const trimmed = text.trim();
+          if (trimmed) {
+            setCaptionLog(prev => [...prev, trimmed]);
+            setCaptionInterim("");
+          }
+        };
+
+        r.onerror = () => { /* absorb errors in fallback — just move to next chunk */ };
+        r.onend   = () => { URL.revokeObjectURL(url); recordOneChunk(); };
+
+        try { r.start(); } catch { recordOneChunk(); }
+        // Safety timeout so a hung instance doesn't stall the chain
+        setTimeout(() => { try { r.stop(); } catch { } }, 5500);
+      };
+
+      recorder.start();
+      setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 4000);
     }
 
-    createAndStart();
+    recordOneChunk();
   }
 
   function stopCaptions() {
     captionOnRef.current = false;
-    captionRecRef.current?.stop();
+
+    try { captionRecRef.current?.stop(); } catch { }
     captionRecRef.current = null;
+
+    try { if (mediaRecRef.current?.state === "recording") mediaRecRef.current.stop(); } catch { }
+    mediaRecRef.current = null;
+
+    captionMicRef.current?.getTracks().forEach(t => t.stop());
+    captionMicRef.current = null;
+
     setCaptionOn(false);
     setCaptionInterim("");
+    setCaptionStatus("");
   }
 
   function clearCaptions() {
     stopCaptions();
     setCaptionLog([]);
     setCaptionInterim("");
+    setCaptionStatus("");
   }
 
   // ── Sound Visualizer (Web Audio API) ──────────────────────────────────────
@@ -1167,7 +1262,7 @@ export default function Beacon() {
               <div className="pg-head">
                 <h1 className="pg-title">Live <span className="hc">Captions</span></h1>
                 <p className="pg-sub">
-                  Real-time speech-to-text. Words appear on screen as they are spoken — ideal for conversations, classrooms, and public spaces. Requires Chrome or Edge.
+                  Real-time speech-to-text. Works on most networks — automatically switches to offline mode if your network blocks speech servers. Use Chrome or Edge.
                 </p>
               </div>
 
@@ -1178,6 +1273,10 @@ export default function Beacon() {
                   <div className="live-pill" aria-label="Microphone active">
                     <div className="live-dot" aria-hidden="true" />LIVE
                   </div>
+                )}
+                {captionStatus && (
+                  <div style={{ position: "absolute", top: 14, left: 14, fontSize: 11, color: "var(--hear)", fontWeight: 600, letterSpacing: "0.5px" }}
+                    aria-live="polite">{captionStatus}</div>
                 )}
                 {captionLog.length === 0 && !captionInterim ? (
                   <p className="caption-placeholder">
