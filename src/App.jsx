@@ -100,17 +100,49 @@ function getDominantColors(imgEl, maxColors = 5) {
 }
 
 function classifyAudio(dataArray) {
-  const avg     = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-  const lowAvg  = dataArray.slice(0, 6).reduce((a, b) => a + b, 0) / 6;
-  const midAvg  = dataArray.slice(6, 22).reduce((a, b) => a + b, 0) / 16;
-  const highAvg = dataArray.slice(22, 42).reduce((a, b) => a + b, 0) / 20;
-  const level   = Math.round((avg / 255) * 100);
-  if (avg < 7)                                           return { label: "Silence",          icon: "🔇", color: "#3a5878", level };
-  if (avg > 140)                                         return { label: "Very Loud",         icon: "🔴", color: "#ef4444", level };
-  if (midAvg > lowAvg * 1.25 && midAvg > highAvg * 0.8) return { label: "Speech Detected",   icon: "🗣",  color: "#10b981", level };
-  if (lowAvg > midAvg * 1.5)                             return { label: "Low Frequency",     icon: "🔉", color: "#8b5cf6", level };
-  if (highAvg > midAvg * 1.35)                           return { label: "Sharp Sound",       icon: "🔔", color: "#f59e0b", level };
-  return                                                  { label: "Background Sound",        icon: "🎵", color: "#06b6d4", level };
+  // With fftSize=128 and a 44100 Hz sample rate each bin covers ~344 Hz.
+  // Bin ranges:
+  //   bass    bins 0-1   (~0-690 Hz)       — low rumble, HVAC
+  //   speech  bins 1-8   (~345-2760 Hz)    — where human voice actually lives
+  //   upper   bins 9-25  (~3105-8625 Hz)   — consonants, sibilance
+  //   air     bins 26-63 (~8970-21735 Hz)  — hiss, very high tones
+
+  const sum = (arr) => arr.reduce((a, b) => a + b, 0);
+
+  const bassArr   = Array.from(dataArray.slice(0, 2));
+  const speechArr = Array.from(dataArray.slice(1, 9));
+  const upperArr  = Array.from(dataArray.slice(9, 26));
+  const airArr    = Array.from(dataArray.slice(26, 64));
+
+  const bassAvg   = sum(bassArr)   / bassArr.length;
+  const speechAvg = sum(speechArr) / speechArr.length;
+  const upperAvg  = sum(upperArr)  / upperArr.length;
+  const airAvg    = sum(airArr)    / airArr.length;
+
+  const allBins = Array.from(dataArray);
+  const totalAvg = sum(allBins) / allBins.length;
+  const level = Math.round((totalAvg / 255) * 100);
+
+  if (totalAvg < 6)  return { label: "Silence",         icon: "🔇", color: "#3a5878", level };
+  if (totalAvg > 130) return { label: "Very Loud",        icon: "🔴", color: "#ef4444", level };
+
+  // Speech: the 300-3000 Hz range is clearly louder than both bass and upper,
+  // and there is meaningful signal present (speechAvg > 12 filters out near-silence).
+  if (speechAvg > 12 && speechAvg > bassAvg * 0.9 && speechAvg > upperAvg * 1.1) {
+    return { label: "Speech Detected", icon: "🗣", color: "#10b981", level };
+  }
+
+  // Heavy bass with little speech — machinery, traffic, low hum
+  if (bassAvg > speechAvg * 1.4 && bassAvg > upperAvg * 1.2) {
+    return { label: "Low Frequency",  icon: "🔉", color: "#8b5cf6", level };
+  }
+
+  // High frequency spike — alarm, clap, sharp click
+  if (airAvg > speechAvg * 1.1 || upperAvg > speechAvg * 1.5) {
+    return { label: "Sharp Sound",    icon: "🔔", color: "#f59e0b", level };
+  }
+
+  return { label: "Background Sound", icon: "🎵", color: "#06b6d4", level };
 }
 
 function useTTS() {
