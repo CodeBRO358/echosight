@@ -1,8 +1,8 @@
 const IMAGES = {
-  hero:     "https://images.unsplash.com/photo-1576765608866-5b51046452be?w=1200&q=80&fit=crop",
-  reading:  "https://images.unsplash.com/photo-1573496528890-a85b44f2fe02?w=800&q=80&fit=crop",
-  family:   "https://images.unsplash.com/photo-1559757175-5700dde675bc?w=800&q=80&fit=crop",
-  student:  "https://images.unsplash.com/photo-1491841651911-c44484fa4f85?w=800&q=80&fit=crop",
+  hero:     "https://images.unsplash.com/photo-1576765608866-5b51046452be?w=1200&q=80&fit=crop&crop=top",
+  story:    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80&fit=crop",
+  kentucky: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80&fit=crop",
+  commit:   "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80&fit=crop",
 };
 
 const features = [
@@ -43,18 +43,20 @@ export default function About() {
           overflow: "hidden",
           marginBottom: 18,
           height: 260,
+          background: "var(--surf2)",
         }}
       >
         <img
           src={IMAGES.hero}
-          alt="Elderly woman using a tablet device for accessibility support"
+          alt="Person receiving accessibility support"
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
             display: "block",
-            filter: "brightness(0.4)",
+            filter: "brightness(0.38)",
           }}
+          onError={e => { e.currentTarget.style.display = "none"; }}
         />
         <div
           style={{
@@ -64,7 +66,7 @@ export default function About() {
             flexDirection: "column",
             justifyContent: "flex-end",
             padding: "28px 30px",
-            background: "linear-gradient(to top, rgba(5,14,31,0.9) 40%, transparent)",
+            background: "linear-gradient(to top, rgba(5,14,31,0.92) 40%, transparent)",
           }}
         >
           <p
@@ -82,7 +84,7 @@ export default function About() {
           <h1
             style={{
               fontFamily: "var(--display)",
-              fontSize: "clamp(24px, 4vw, 36px)",
+              fontSize: "clamp(22px, 4vw, 34px)",
               fontWeight: 800,
               lineHeight: 1.15,
               letterSpacing: "-0.5px",
@@ -109,7 +111,7 @@ export default function About() {
         {[
           { number: "2.2B",  note: "people worldwide live with vision impairment — WHO, 2023" },
           { number: "37.5M", note: "American adults report trouble hearing — NIDCD, 2023" },
-          { number: "35%",   note: "of Kentucky adults live with at least one disability — CDC DHDS" },
+          { number: "35%",   note: "of Kentucky adults live with at least one disability — CDC" },
           { number: "$0",    note: "is what Beacon costs to use, now and always" },
         ].map(({ number, note }) => (
           <div
@@ -134,28 +136,14 @@ export default function About() {
             >
               {number}
             </div>
-            <div
-              style={{
-                fontSize: 11,
-                color: "var(--dim)",
-                marginTop: 7,
-                lineHeight: 1.5,
-              }}
-            >
+            <div style={{ fontSize: 11, color: "var(--dim)", marginTop: 7, lineHeight: 1.5 }}>
               {note}
             </div>
           </div>
         ))}
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 18,
-          marginBottom: 18,
-        }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 }}>
         <Card>
           <Label>Our Story</Label>
           <p style={body}>
@@ -179,30 +167,11 @@ export default function About() {
           </p>
         </Card>
 
-        <div style={{ borderRadius: "var(--r)", overflow: "hidden", minHeight: 280 }}>
-          <img
-            src={IMAGES.family}
-            alt="Family member helping an elderly relative use a smartphone"
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
-        </div>
+        <PhotoBlock src={IMAGES.story} alt="Person using a laptop with assistive features" />
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 18,
-          marginBottom: 18,
-        }}
-      >
-        <div style={{ borderRadius: "var(--r)", overflow: "hidden", minHeight: 260 }}>
-          <img
-            src={IMAGES.reading}
-            alt="Person using assistive technology to listen to audio through earphones"
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
-        </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 }}>
+        <PhotoBlock src={IMAGES.kentucky} alt="Diverse group of people in a community" />
 
         <Card>
           <Label>Why Kentucky</Label>
@@ -289,14 +258,7 @@ export default function About() {
         </div>
       </Card>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 18,
-          marginBottom: 18,
-        }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 }}>
         <Card>
           <Label>Our Commitment</Label>
           <p style={body}>
@@ -335,13 +297,7 @@ export default function About() {
           </div>
         </Card>
 
-        <div style={{ borderRadius: "var(--r)", overflow: "hidden", minHeight: 260 }}>
-          <img
-            src={IMAGES.student}
-            alt="Student working at a computer"
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
-        </div>
+        <PhotoBlock src={IMAGES.commit} alt="Student working on a laptop" />
       </div>
 
       <div
@@ -368,6 +324,32 @@ export default function About() {
         <br />
         Runs entirely in your browser · No accounts · No fees · Open source
       </div>
+    </div>
+  );
+}
+
+function PhotoBlock({ src, alt }) {
+  return (
+    <div
+      style={{
+        borderRadius: "var(--r)",
+        overflow: "hidden",
+        minHeight: 260,
+        background: "var(--surf2)",
+      }}
+    >
+      <img
+        src={src}
+        alt={alt}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+          minHeight: 260,
+        }}
+        onError={e => { e.currentTarget.style.display = "none"; }}
+      />
     </div>
   );
 }
