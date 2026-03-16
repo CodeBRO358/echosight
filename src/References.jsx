@@ -45,15 +45,7 @@ const sections = [
         source: "NIDCD, National Institutes of Health",
         year: "2023",
         url: "https://www.nidcd.nih.gov/health/statistics/quick-statistics-hearing",
-        note: "Source for U.S. hearing loss prevalence statistics including the 37.5 million and 1-in-8 figures.",
-      },
-      {
-        authors: "Haile, L.M. et al. (GBD 2019 USA Hearing Loss Collaborators)",
-        title: "Hearing Loss Prevalence, Years Lived With Disability, and Hearing Aid Use in the United States From 1990 to 2019",
-        source: "Ear and Hearing, 45(1), 257–267",
-        year: "2024",
-        url: "https://doi.org/10.1097/AUD.0000000000001420",
-        note: "Comprehensive GBD study on the U.S. burden of hearing loss.",
+        note: "Source for U.S. hearing loss prevalence including the 37.5 million and 1-in-8 figures.",
       },
       {
         authors: "National Institute on Deafness and Other Communication Disorders (NIDCD)",
@@ -62,6 +54,14 @@ const sections = [
         year: "2023",
         url: "https://www.nidcd.nih.gov/health/age-related-hearing-loss",
         note: "Context on the relationship between age and hearing loss.",
+      },
+      {
+        authors: "World Health Organization",
+        title: "Deafness and hearing loss",
+        source: "WHO Fact Sheets",
+        year: "2023",
+        url: "https://www.who.int/news-room/fact-sheets/detail/deafness-and-hearing-loss",
+        note: "Global hearing loss statistics and impact overview.",
       },
     ],
   },
@@ -73,32 +73,24 @@ const sections = [
         title: "Disability and Health Data System (DHDS)",
         source: "CDC, National Center on Birth Defects and Developmental Disabilities",
         year: "2024",
-        url: "https://dhds.cdc.gov",
-        note: "Source for the 35% Kentucky adult disability rate (1,253,016 individuals) and the $14B annual healthcare cost figure.",
+        url: "https://dhds.cdc.gov/",
+        note: "Source for the 35% Kentucky adult disability rate and state-level disability data.",
       },
       {
         authors: "Centers for Disease Control and Prevention",
-        title: "CDC Data Shows Over 70 Million U.S. Adults Reported Having a Disability",
-        source: "CDC Online Newsroom",
-        year: "2024",
-        url: "https://www.cdc.gov/media/releases/2024/s0716-adult-disability.html",
-        note: "National context for the 1-in-4 U.S. adults disability statistic.",
-      },
-      {
-        authors: "University of Montana Rural Institute on Disabilities",
-        title: "Kentucky State Disability Profile",
-        source: "Rural Disability Research, University of Montana",
-        year: "2020",
-        url: "https://www.umt.edu/rural-disability-research/focus-areas/disability_maps/state-maps/kentucky.php",
-        note: "County-level disability rate mapping for Kentucky, showing elevated rates in eastern rural counties.",
-      },
-      {
-        authors: "Kentucky Workforce Innovation Board / U.S. Department of Education",
-        title: "WIOA State Plan — Workforce Analysis: Disability and Health",
-        source: "WIOA State Plan Portal",
+        title: "Disability Impacts All of Us",
+        source: "CDC Disability and Health Promotion",
         year: "2023",
-        url: "https://wioaplans.ed.gov/node/20636",
-        note: "Source for the 450,700 figure on working-age Kentuckians with a disability.",
+        url: "https://www.cdc.gov/ncbddd/disabilityandhealth/infographic-disability-impacts-all.html",
+        note: "Source for the 1-in-4 U.S. adults disability statistic and national context.",
+      },
+      {
+        authors: "Centers for Disease Control and Prevention",
+        title: "Disability and Health State Chartbook, 2023",
+        source: "CDC, National Center on Birth Defects and Developmental Disabilities",
+        year: "2023",
+        url: "https://www.cdc.gov/ncbddd/disabilityandhealth/documents/disability_chartbook_2023.pdf",
+        note: "State-by-state disability prevalence data used for Kentucky-specific statistics.",
       },
     ],
   },
@@ -106,7 +98,7 @@ const sections = [
     title: "Technologies Used",
     entries: [
       {
-        authors: "Naptha / naptha.js contributors",
+        authors: "naptha / Tesseract.js contributors",
         title: "Tesseract.js — Pure JavaScript OCR for more than 100 Languages",
         source: "GitHub: naptha/tesseract.js",
         year: "2024",
@@ -114,15 +106,7 @@ const sections = [
         note: "Open-source JavaScript port of Google's Tesseract OCR engine. Used in Beacon's Text Scanner feature.",
       },
       {
-        authors: "Google / Open Source Community",
-        title: "Tesseract OCR Engine",
-        source: "GitHub: tesseract-ocr/tesseract",
-        year: "2024",
-        url: "https://github.com/tesseract-ocr/tesseract",
-        note: "The underlying C++ OCR engine originally developed by HP and released by Google.",
-      },
-      {
-        authors: "Mozilla Developer Network (MDN)",
+        authors: "Mozilla Developer Network",
         title: "Web Speech API — SpeechRecognition",
         source: "MDN Web Docs",
         year: "2024",
@@ -130,7 +114,7 @@ const sections = [
         note: "Browser-native speech-to-text API used for Beacon's Live Captions feature.",
       },
       {
-        authors: "Mozilla Developer Network (MDN)",
+        authors: "Mozilla Developer Network",
         title: "Web Speech API — SpeechSynthesis",
         source: "MDN Web Docs",
         year: "2024",
@@ -138,7 +122,7 @@ const sections = [
         note: "Browser-native text-to-speech API used for read-aloud functionality across all features.",
       },
       {
-        authors: "Mozilla Developer Network (MDN)",
+        authors: "Mozilla Developer Network",
         title: "Web Audio API — AnalyserNode",
         source: "MDN Web Docs",
         year: "2024",
@@ -146,7 +130,7 @@ const sections = [
         note: "Real-time audio frequency analysis API used in Beacon's Sound View feature.",
       },
       {
-        authors: "Mozilla Developer Network (MDN)",
+        authors: "Mozilla Developer Network",
         title: "Canvas API",
         source: "MDN Web Docs",
         year: "2024",
@@ -154,7 +138,7 @@ const sections = [
         note: "Used for pixel-level color analysis in Color Finder and waveform rendering in Sound View.",
       },
       {
-        authors: "Mozilla Developer Network (MDN)",
+        authors: "Mozilla Developer Network",
         title: "MediaRecorder API",
         source: "MDN Web Docs",
         year: "2024",
@@ -162,7 +146,7 @@ const sections = [
         note: "Used in the chunked fallback mode of Live Captions for restricted networks.",
       },
       {
-        authors: "Meta Open Source / React Contributors",
+        authors: "Meta Open Source",
         title: "React — The library for web and native user interfaces",
         source: "react.dev",
         year: "2024",
@@ -184,35 +168,43 @@ const sections = [
     entries: [
       {
         authors: "Unsplash Contributors",
-        title: "Hero image — elderly woman using a tablet",
-        source: "Unsplash (free-use license)",
+        title: "About page hero image — person with tablet",
+        source: "Unsplash — Free-use image license",
         year: "2024",
-        url: "https://unsplash.com/photos/Cb4G4G5G4G4",
-        note: "About page hero image. Used under the Unsplash License.",
+        url: "https://unsplash.com/photos/Wiu3w-99tNg",
+        note: "Used under the Unsplash License, which permits free use in personal and commercial projects.",
       },
       {
         authors: "Unsplash Contributors",
-        title: "Family assistance image",
-        source: "Unsplash (free-use license)",
+        title: "Our Story section image — person using a laptop",
+        source: "Unsplash — Free-use image license",
         year: "2024",
-        url: "https://unsplash.com",
-        note: "About page section image. Used under the Unsplash License.",
+        url: "https://unsplash.com/photos/ZVprbBmT8QA",
+        note: "Used under the Unsplash License.",
       },
       {
         authors: "Unsplash Contributors",
-        title: "Assistive technology image",
-        source: "Unsplash (free-use license)",
+        title: "Why Kentucky section image — community group",
+        source: "Unsplash — Free-use image license",
         year: "2024",
-        url: "https://unsplash.com",
-        note: "About page section image. Used under the Unsplash License.",
+        url: "https://unsplash.com/photos/rDEOVtE7vOs",
+        note: "Used under the Unsplash License.",
       },
       {
         authors: "Unsplash Contributors",
-        title: "Student at computer image",
-        source: "Unsplash (free-use license)",
+        title: "Our Commitment section image — student with laptop",
+        source: "Unsplash — Free-use image license",
         year: "2024",
-        url: "https://unsplash.com",
-        note: "About page section image. Used under the Unsplash License.",
+        url: "https://unsplash.com/photos/gMsnXqILjp4",
+        note: "Used under the Unsplash License.",
+      },
+      {
+        authors: "Unsplash",
+        title: "Unsplash License",
+        source: "unsplash.com/license",
+        year: "2024",
+        url: "https://unsplash.com/license",
+        note: "Full terms of the Unsplash free-use image license.",
       },
     ],
   },
@@ -233,20 +225,11 @@ export default function References() {
           }}
         >
           References &{" "}
-          <span style={{ color: "var(--vis)", fontStyle: "italic" }}>
-            Citations
-          </span>
+          <span style={{ color: "var(--vis)", fontStyle: "italic" }}>Citations</span>
         </h1>
-        <p
-          style={{
-            color: "var(--dim)",
-            fontSize: 14,
-            lineHeight: 1.65,
-            maxWidth: 520,
-          }}
-        >
-          All statistics, research, and third-party content used in Beacon are
-          cited below. Sources are organized by category.
+        <p style={{ color: "var(--dim)", fontSize: 14, lineHeight: 1.65, maxWidth: 520 }}>
+          All statistics, research, and third-party content used in Beacon are cited below.
+          Sources are organized by category. Citations follow APA 7th edition style.
         </p>
       </div>
 
@@ -263,7 +246,7 @@ export default function References() {
         >
           <div
             style={{
-              padding: "14px 22px",
+              padding: "13px 22px",
               borderBottom: "1px solid var(--border)",
               background: "var(--surf2)",
             }}
@@ -286,8 +269,7 @@ export default function References() {
               key={i}
               style={{
                 padding: "16px 22px",
-                borderBottom:
-                  i < entries.length - 1 ? "1px solid var(--border)" : "none",
+                borderBottom: i < entries.length - 1 ? "1px solid var(--border)" : "none",
               }}
             >
               <div
@@ -311,25 +293,11 @@ export default function References() {
                   >
                     {entry.title}
                   </p>
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: "var(--dim)",
-                      lineHeight: 1.5,
-                      marginBottom: 2,
-                    }}
-                  >
+                  <p style={{ fontSize: 13, color: "var(--dim)", lineHeight: 1.5, marginBottom: 2 }}>
                     {entry.authors}
                   </p>
-                  <p
-                    style={{
-                      fontSize: 12,
-                      color: "var(--mute)",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {entry.source}
-                    {entry.year ? ` · ${entry.year}` : ""}
+                  <p style={{ fontSize: 12, color: "var(--mute)", lineHeight: 1.5 }}>
+                    {entry.source}{entry.year ? ` · ${entry.year}` : ""}
                   </p>
                   {entry.note && (
                     <p
@@ -353,7 +321,6 @@ export default function References() {
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 6,
                     padding: "6px 12px",
                     borderRadius: 8,
                     fontSize: 12,
@@ -366,8 +333,8 @@ export default function References() {
                     flexShrink: 0,
                     transition: "opacity 0.15s ease",
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.opacity = "0.75")}
-                  onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = "0.7"; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
                 >
                   View Source
                 </a>
@@ -383,7 +350,6 @@ export default function References() {
           border: "1px solid var(--border)",
           borderRadius: "var(--r)",
           padding: "18px 22px",
-          marginBottom: 8,
         }}
       >
         <p
@@ -396,15 +362,12 @@ export default function References() {
             marginBottom: 10,
           }}
         >
-          Citation Format
+          Note on Sources
         </p>
-        <p
-          style={{ fontSize: 13, color: "var(--dim)", lineHeight: 1.7 }}
-        >
-          Citations follow APA 7th edition style. All URLs were last accessed
-          in 2025. Statistics from government sources (CDC, NIDCD, WHO) reflect
-          the most recent data available at time of project submission. All
-          images are used under the{" "}
+        <p style={{ fontSize: 13, color: "var(--dim)", lineHeight: 1.7 }}>
+          All URLs were verified and accessed in 2025. Statistics from government
+          sources (CDC, NIDCD, WHO) reflect the most recent data available at time
+          of project submission. All images are used under the{" "}
           <a
             href="https://unsplash.com/license"
             target="_blank"
@@ -413,7 +376,8 @@ export default function References() {
           >
             Unsplash License
           </a>
-          , which permits free use without attribution requirements.
+          , which permits free use without attribution requirements, though we
+          include attribution as best practice.
         </p>
       </div>
     </div>
