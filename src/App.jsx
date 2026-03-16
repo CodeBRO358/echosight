@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import About from "./About.jsx";
-import References from "./Refereebces.jsx";
+import References from "./References.jsx";
 
 const COLOR_DB = [
   { name: "Black",         r: 15,  g: 15,  b: 15  },
