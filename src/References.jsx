@@ -103,7 +103,7 @@ const sections = [
         source: "GitHub: naptha/tesseract.js",
         year: "2024",
         url: "https://github.com/naptha/tesseract.js",
-        note: "Open-source JavaScript port of Google's Tesseract OCR engine. Used in Beacon's Text Scanner feature.",
+        note: "Open-source JavaScript port of Google's Tesseract OCR engine. Used in Beacon's Text Scanner.",
       },
       {
         authors: "Mozilla Developer Network",
@@ -161,6 +161,14 @@ const sections = [
         url: "https://vitejs.dev",
         note: "Build tool and development server used for the Beacon project.",
       },
+      {
+        authors: "Tailwind CSS Contributors",
+        title: "Tailwind CSS — A utility-first CSS framework",
+        source: "tailwindcss.com",
+        year: "2024",
+        url: "https://tailwindcss.com",
+        note: "Utility-first CSS framework used for styling the Beacon interface.",
+      },
     ],
   },
   {
@@ -172,11 +180,11 @@ const sections = [
         source: "Unsplash — Free-use image license",
         year: "2024",
         url: "https://unsplash.com/photos/Wiu3w-99tNg",
-        note: "Used under the Unsplash License, which permits free use in personal and commercial projects.",
+        note: "Used under the Unsplash License.",
       },
       {
         authors: "Unsplash Contributors",
-        title: "Our Story section image — person using a laptop",
+        title: "Our Story section — person using a laptop",
         source: "Unsplash — Free-use image license",
         year: "2024",
         url: "https://unsplash.com/photos/ZVprbBmT8QA",
@@ -184,7 +192,7 @@ const sections = [
       },
       {
         authors: "Unsplash Contributors",
-        title: "Why Kentucky section image — community group",
+        title: "Why Kentucky section — community group",
         source: "Unsplash — Free-use image license",
         year: "2024",
         url: "https://unsplash.com/photos/rDEOVtE7vOs",
@@ -192,7 +200,7 @@ const sections = [
       },
       {
         authors: "Unsplash Contributors",
-        title: "Our Commitment section image — student with laptop",
+        title: "Our Commitment section — student with laptop",
         source: "Unsplash — Free-use image license",
         year: "2024",
         url: "https://unsplash.com/photos/gMsnXqILjp4",
@@ -212,105 +220,35 @@ const sections = [
 
 export default function References() {
   return (
-    <div style={{ animation: "rise 0.45s ease both" }}>
-      <div style={{ marginBottom: 26 }}>
-        <h1
-          style={{
-            fontFamily: "var(--display)",
-            fontSize: 26,
-            fontWeight: 800,
-            lineHeight: 1.2,
-            marginBottom: 6,
-            letterSpacing: "-0.3px",
-          }}
-        >
+    <div className="animate-rise">
+      <div className="mb-7">
+        <h1 className="font-display text-[26px] font-extrabold leading-[1.2] mb-1.5 tracking-[-0.3px]">
           References &{" "}
-          <span style={{ color: "var(--vis)", fontStyle: "italic" }}>Citations</span>
+          <span className="text-vis italic">Citations</span>
         </h1>
-        <p style={{ color: "var(--dim)", fontSize: 14, lineHeight: 1.65, maxWidth: 520 }}>
+        <p className="text-dim text-sm leading-[1.65] max-w-[520px]">
           All statistics, research, and third-party content used in Beacon are cited below.
           Sources are organized by category. Citations follow APA 7th edition style.
         </p>
       </div>
 
       {sections.map(({ title, entries }) => (
-        <div
-          key={title}
-          style={{
-            background: "var(--surf)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--r)",
-            marginBottom: 14,
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              padding: "13px 22px",
-              borderBottom: "1px solid var(--border)",
-              background: "var(--surf2)",
-            }}
-          >
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "1.6px",
-                textTransform: "uppercase",
-                color: "var(--vis)",
-              }}
-            >
-              {title}
-            </span>
+        <div key={title} className="bg-card border border-line rounded-main mb-3.5 overflow-hidden">
+          <div className="px-[22px] py-[13px] border-b border-line bg-card2">
+            <span className="text-[11px] font-bold tracking-[1.6px] uppercase text-vis">{title}</span>
           </div>
 
           {entries.map((entry, i) => (
-            <div
-              key={i}
-              style={{
-                padding: "16px 22px",
-                borderBottom: i < entries.length - 1 ? "1px solid var(--border)" : "none",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                  gap: 16,
-                  flexWrap: "wrap",
-                }}
-              >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      color: "var(--text)",
-                      lineHeight: 1.4,
-                      marginBottom: 3,
-                    }}
-                  >
-                    {entry.title}
-                  </p>
-                  <p style={{ fontSize: 13, color: "var(--dim)", lineHeight: 1.5, marginBottom: 2 }}>
-                    {entry.authors}
-                  </p>
-                  <p style={{ fontSize: 12, color: "var(--mute)", lineHeight: 1.5 }}>
+            <div key={i} className={`px-[22px] py-4 ${i < entries.length - 1 ? "border-b border-line" : ""}`}>
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-tx leading-[1.4] mb-1">{entry.title}</p>
+                  <p className="text-[13px] text-dim leading-[1.5] mb-0.5">{entry.authors}</p>
+                  <p className="text-xs text-mute leading-[1.5]">
                     {entry.source}{entry.year ? ` · ${entry.year}` : ""}
                   </p>
                   {entry.note && (
-                    <p
-                      style={{
-                        fontSize: 12,
-                        color: "var(--dim)",
-                        lineHeight: 1.5,
-                        marginTop: 6,
-                        fontStyle: "italic",
-                      }}
-                    >
-                      {entry.note}
-                    </p>
+                    <p className="text-xs text-dim leading-[1.5] mt-1.5 italic">{entry.note}</p>
                   )}
                 </div>
                 <a
@@ -318,23 +256,7 @@ export default function References() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={`Open source: ${entry.title}`}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    padding: "6px 12px",
-                    borderRadius: 8,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "var(--vis)",
-                    background: "var(--vis-s)",
-                    border: "1px solid rgba(245,158,11,0.25)",
-                    textDecoration: "none",
-                    whiteSpace: "nowrap",
-                    flexShrink: 0,
-                    transition: "opacity 0.15s ease",
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.opacity = "0.7"; }}
-                  onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+                  className="inline-flex items-center px-3 py-1.5 rounded-[8px] text-xs font-semibold text-vis bg-vis-s border border-vis/25 no-underline whitespace-nowrap flex-shrink-0 hover:opacity-75 transition-opacity"
                 >
                   View Source
                 </a>
@@ -344,40 +266,20 @@ export default function References() {
         </div>
       ))}
 
-      <div
-        style={{
-          background: "var(--surf)",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--r)",
-          padding: "18px 22px",
-        }}
-      >
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "1.4px",
-            textTransform: "uppercase",
-            color: "var(--mute)",
-            marginBottom: 10,
-          }}
-        >
-          Note on Sources
-        </p>
-        <p style={{ fontSize: 13, color: "var(--dim)", lineHeight: 1.7 }}>
-          All URLs were verified and accessed in 2025. Statistics from government
-          sources (CDC, NIDCD, WHO) reflect the most recent data available at time
-          of project submission. All images are used under the{" "}
+      <div className="bg-card border border-line rounded-main px-[22px] py-[18px]">
+        <p className="text-[11px] font-bold tracking-[1.4px] uppercase text-mute mb-2.5">Note on Sources</p>
+        <p className="text-[13px] text-dim leading-[1.7]">
+          All URLs were verified and accessed in 2025. Statistics from government sources (CDC, NIDCD, WHO)
+          reflect the most recent data available at time of project submission. All images are used under the{" "}
           <a
             href="https://unsplash.com/license"
             target="_blank"
             rel="noreferrer"
-            style={{ color: "var(--vis)", textDecoration: "underline" }}
+            className="text-vis underline"
           >
             Unsplash License
           </a>
-          , which permits free use without attribution requirements, though we
-          include attribution as best practice.
+          , which permits free use without attribution requirements, though we include attribution as best practice.
         </p>
       </div>
     </div>
