@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
-// ─── Color name database for the Color Finder feature ────────────────────────
-// Maps RGB values to human-readable color names using nearest-neighbor matching
 const COLOR_DB = [
   { name: "Black",         r: 15,  g: 15,  b: 15  },
   { name: "Charcoal",      r: 54,  g: 54,  b: 58  },
@@ -56,7 +54,6 @@ const COLOR_DB = [
   { name: "Lavender",      r: 200, g: 170, b: 240 },
 ];
 
-// Finds the closest color name using Euclidean distance in RGB space
 function findColorName(r, g, b) {
   let closest = COLOR_DB[0];
   let minDist = Infinity;
@@ -67,7 +64,6 @@ function findColorName(r, g, b) {
   return closest.name;
 }
 
-// Extracts the dominant colors from an image element using canvas pixel sampling
 function getDominantColors(imgEl, maxColors = 5) {
   const MAX_DIM = 160;
   const canvas  = document.createElement("canvas");
@@ -79,10 +75,9 @@ function getDominantColors(imgEl, maxColors = 5) {
   ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
   const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-  // Group pixels into color buckets (quantize to reduce noise)
   const buckets = {};
   for (let i = 0; i < data.length; i += 16) {
-    if (data[i + 3] < 128) continue; // skip transparent pixels
+    if (data[i + 3] < 128) continue;
     const r = Math.floor(data[i]     / 28) * 28;
     const g = Math.floor(data[i + 1] / 28) * 28;
     const b = Math.floor(data[i + 2] / 28) * 28;
@@ -90,7 +85,6 @@ function getDominantColors(imgEl, maxColors = 5) {
     buckets[key] = (buckets[key] || 0) + 1;
   }
 
-  // Sort by frequency and remove duplicate color names
   const seen = new Set();
   const results = [];
   for (const [key] of Object.entries(buckets).sort((a, b) => b[1] - a[1])) {
@@ -106,7 +100,6 @@ function getDominantColors(imgEl, maxColors = 5) {
   return results;
 }
 
-// Classifies audio based on frequency distribution
 function classifyAudio(dataArray) {
   const avg     = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
   const lowAvg  = dataArray.slice(0, 6).reduce((a, b) => a + b, 0) / 6;
@@ -122,7 +115,6 @@ function classifyAudio(dataArray) {
   return                                                  { label: "Background Sound",        icon: "🎵", color: "#06b6d4", level };
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap');
 
@@ -476,7 +468,6 @@ const CSS = `
   canvas { display: block; }
 `;
 
-// ─── TTS Hook ─────────────────────────────────────────────────────────────────
 function useTTS() {
   const [speaking, setSpeaking] = useState(false);
   const [rate,     setRateState] = useState(1.0);
@@ -503,7 +494,6 @@ function useTTS() {
   return { speaking, speak, stop, rate, setRate };
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
 function CameraView({ videoRef, canvasRef, onCapture, onCancel }) {
   return (
     <div>
@@ -543,14 +533,12 @@ function TTSBlock({ text, tts }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 export default function Beacon() {
   const [tab, setTab]               = useState("text");
   const [hc,  setHc]                = useState(false);
   const [toast, setToast]           = useState(null);
   const tts = useTTS();
 
-  // Text Scanner state
   const [textImg,    setTextImg]    = useState(null);
   const [ocrResult,  setOcrResult]  = useState(null);
   const [ocrStatus,  setOcrStatus]  = useState("");
@@ -560,27 +548,23 @@ export default function Beacon() {
   const [textCamOn,  setTextCamOn]  = useState(false);
   const [readMode,   setReadMode]   = useState(false);
 
-  // Color Finder state
   const [colorImg,     setColorImg]     = useState(null);
   const [colorResult,  setColorResult]  = useState(null);
   const [colorLoading, setColorLoading] = useState(false);
   const [colorError,   setColorError]   = useState(null);
   const [colorCamOn,   setColorCamOn]   = useState(false);
 
-  // Live Captions state
   const [captionOn,      setCaptionOn]      = useState(false);
   const [captionInterim, setCaptionInterim] = useState("");
   const [captionLog,     setCaptionLog]     = useState([]);
   const [fontSize,       setFontSize]       = useState("md");
   const [captionStatus,  setCaptionStatus]  = useState("");
 
-  // Sound Visualizer state
   const [soundOn,    setSoundOn]    = useState(false);
   const [soundClass, setSoundClass] = useState(null);
   const [soundLevel, setSoundLevel] = useState(0);
   const [flash,      setFlash]      = useState(false);
 
-  // Refs
   const textFileRef  = useRef();
   const colorFileRef = useRef();
   const videoRef     = useRef();
@@ -601,7 +585,6 @@ export default function Beacon() {
 
   const FONT_SIZES = { sm: "16px", md: "22px", lg: "30px" };
 
-  // ── Effects ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     document.body.classList.toggle("hc", hc);
   }, [hc]);
@@ -615,7 +598,6 @@ export default function Beacon() {
     };
   }, []);
 
-  // ── Toast helper ─────────────────────────────────────────────────────────────
   function toast_(msg) {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
@@ -636,7 +618,6 @@ export default function Beacon() {
     toast_("📄 Exported!");
   }
 
-  // ── Tab switching ─────────────────────────────────────────────────────────────
   function switchTab(t) {
     stopCamera();
     stopCaptions();
@@ -645,7 +626,6 @@ export default function Beacon() {
     setTab(t);
   }
 
-  // ── Camera helpers ─────────────────────────────────────────────────────────────
   async function startCamera(setActive, setError) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
@@ -684,7 +664,6 @@ export default function Beacon() {
     reader.readAsDataURL(file);
   }
 
-  // ── Text Scanner (OCR via Tesseract.js CDN) ────────────────────────────────
   async function runOCR() {
     if (!textImg) return;
     if (!window.Tesseract) {
@@ -700,7 +679,6 @@ export default function Beacon() {
     tts.stop();
 
     try {
-      // Create an image element so Tesseract can read it reliably
       const imgEl = new Image();
       imgEl.src = textImg.src;
       await new Promise(res => { imgEl.onload = res; });
@@ -736,7 +714,6 @@ export default function Beacon() {
     }
   }
 
-  // ── Color Finder (Canvas pixel analysis) ──────────────────────────────────
   function runColorAnalysis() {
     if (!colorImg) return;
     setColorLoading(true);
@@ -773,36 +750,6 @@ export default function Beacon() {
     };
   }
 
-  // ── Live Captions (Web Speech API SpeechRecognition) ───────────────────────
-  //
-  // Edge-specific fixes applied here:
-  //
-  // Fix 1: Edge's SpeechRecognition silently fails if microphone permission
-  // has not been explicitly confirmed beforehand. We request mic access via
-  // getUserMedia first, then immediately release it. This forces the browser
-  // to grant and record the permission before SpeechRecognition takes over.
-  //
-  // Fix 2: After recognition ends (even briefly between sentences), reusing
-  // the same SpeechRecognition object to call .start() again causes Edge to
-  // throw internally and stop silently. We create a brand-new instance every
-  // time recognition restarts instead.
-  //
-  // Fix 3: Renamed the loop variable from `final` (reserved word in some
-  // strict-mode Edge builds) to `finalText`.
-  //
-  // Fix 4: Errors like "not-allowed" and "service-not-allowed" previously
-  // ── Live Captions ─────────────────────────────────────────────────────────
-  //
-  // Uses a two-tier approach to work on restricted networks (hotspots,
-  // school WiFi) that block the cloud speech-recognition servers:
-  //
-  //   Tier 1: SpeechRecognition streaming — real-time, lowest latency.
-  //           If a "network" error occurs (cloud blocked), auto-switches
-  //           to Tier 2 without any user action needed.
-  //
-  //   Tier 2: Chunked MediaRecorder fallback — records 4-second audio
-  //           chunks and transcribes each one individually, bypassing
-  //           the persistent cloud connection.
 
   async function startCaptions() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -811,9 +758,6 @@ export default function Beacon() {
       return;
     }
 
-    // Acquire microphone once up-front and hold the stream.
-    // Keeping the stream open prevents Edge from revoking permission
-    // mid-session and gives MediaRecorder something to record from.
     let micStream;
     try {
       micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -831,8 +775,6 @@ export default function Beacon() {
     startStreamingRecognition(SR);
   }
 
-  // Tier 1 — continuous streaming recognition.
-  // On network error automatically drops to Tier 2.
   function startStreamingRecognition(SR) {
     if (!captionOnRef.current) return;
 
@@ -858,7 +800,6 @@ export default function Beacon() {
 
     rec.onerror = e => {
       if (e.error === "network") {
-        // Cloud servers blocked — silently switch to chunked offline mode.
         captionRecRef.current = null;
         setCaptionStatus("Network blocked — switched to offline mode");
         setCaptionInterim("(Speak in short phrases — processing every 4 seconds)");
@@ -881,9 +822,6 @@ export default function Beacon() {
     try { rec.start(); } catch { /* already running */ }
   }
 
-  // Tier 2 — chunked MediaRecorder fallback for restricted networks.
-  // Records 4-second audio clips from the persistent mic stream and
-  // submits each as a standalone recognition request.
   function startChunkedRecognition(SR) {
     if (!captionOnRef.current || !captionMicRef.current) return;
 
@@ -909,10 +847,6 @@ export default function Beacon() {
 
         const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
 
-        // Use a fresh SpeechRecognition instance for each chunk.
-        // Supplying the audio URL works in some browsers; in others the
-        // instance just listens via mic for a brief window — either way
-        // we get a transcription and chain to the next chunk.
         const r = new SR();
         r.continuous     = false;
         r.interimResults = false;
@@ -937,7 +871,6 @@ export default function Beacon() {
         r.onend   = () => { URL.revokeObjectURL(url); recordOneChunk(); };
 
         try { r.start(); } catch { recordOneChunk(); }
-        // Safety timeout so a hung instance doesn't stall the chain
         setTimeout(() => { try { r.stop(); } catch { } }, 5500);
       };
 
@@ -972,7 +905,6 @@ export default function Beacon() {
     setCaptionStatus("");
   }
 
-  // ── Sound Visualizer (Web Audio API) ──────────────────────────────────────
   async function startSound() {
     try {
       const stream  = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -998,7 +930,6 @@ export default function Beacon() {
     const canvas = soundCanvasRef.current;
     if (!canvas) return;
 
-    // Set internal canvas pixel size to match display size
     canvas.width  = canvas.clientWidth  || 600;
     canvas.height = canvas.clientHeight || 200;
 
@@ -1011,7 +942,6 @@ export default function Beacon() {
       animFrameRef.current = requestAnimationFrame(frame);
       analyser.getByteFrequencyData(dataArray);
 
-      // Fade background for trail effect
       ctx.fillStyle = "rgba(5, 14, 31, 0.45)";
       ctx.fillRect(0, 0, W, H);
 
@@ -1024,7 +954,6 @@ export default function Beacon() {
         const barH = v * H * 0.9;
         const x    = i * barW;
 
-        // Gradient: cyan (low freq) → amber (high freq)
         const t = i / barCount;
         const r = Math.round(6   * (1 - t) + 245 * t);
         const g = Math.round(182 * (1 - t) + 158 * t);
@@ -1041,7 +970,6 @@ export default function Beacon() {
       setSoundClass(classification);
       setSoundLevel(classification.level);
 
-      // Flash alert for very loud sounds
       if (classification.level > 75) {
         setFlash(true);
         setTimeout(() => setFlash(false), 120);
@@ -1067,19 +995,16 @@ export default function Beacon() {
     setSoundClass(null);
     setSoundLevel(0);
 
-    // Clear canvas
     const canvas = soundCanvasRef.current;
     if (canvas) canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // ─── Confidence badge helper ───────────────────────────────────────────────
   function confidenceBadge(pct) {
     if (pct > 75) return <span className="confidence-badge conf-high">✓ High confidence ({pct}%)</span>;
     if (pct > 45) return <span className="confidence-badge conf-mid">~ Medium confidence ({pct}%)</span>;
     return               <span className="confidence-badge conf-low">⚠ Low confidence ({pct}%) — try a clearer photo</span>;
   }
 
-  // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <>
       <style>{CSS}</style>
@@ -1130,7 +1055,7 @@ export default function Beacon() {
         {/* Main content */}
         <main id="main" aria-live="polite" aria-atomic="false">
 
-          {/* ══ TEXT SCANNER ══════════════════════════════════════════════════ */}
+          {/* Text Scanner */}
           {tab === "text" && (
             <div>
               <div className="pg-head">
@@ -1252,7 +1177,7 @@ export default function Beacon() {
             </div>
           )}
 
-          {/* ══ LIVE CAPTIONS ═════════════════════════════════════════════════ */}
+          {/* LIVE CAPTIONS */}
           {tab === "captions" && (
             <div>
               <div className="pg-head">
@@ -1322,7 +1247,7 @@ export default function Beacon() {
             </div>
           )}
 
-          {/* ══ COLOR FINDER ══════════════════════════════════════════════════ */}
+          {/* COLOR FINDER */}
           {tab === "color" && (
             <div>
               <div className="pg-head">
@@ -1435,7 +1360,7 @@ export default function Beacon() {
             </div>
           )}
 
-          {/* ══ SOUND VIEW ════════════════════════════════════════════════════ */}
+          {/* SOUND VIEW */}
           {tab === "sound" && (
             <div>
               <div className="pg-head">
@@ -1509,7 +1434,7 @@ export default function Beacon() {
         </main>
 
         <footer>
-          Built for <strong>Kentucky TSA Software Development 2025</strong> · Beacon — Universal Accessibility Companion · Runs entirely in your browser
+          Built for <strong>Kentucky TSA Software Development 2025</strong> · Beacon, Universal Accessibility Companion
         </footer>
       </div>
 
