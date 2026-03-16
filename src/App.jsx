@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import About from "./About.jsx";
+import References from "./Refereebces.jsx";
 
 const COLOR_DB = [
   { name: "Black",         r: 15,  g: 15,  b: 15  },
@@ -1040,6 +1042,8 @@ export default function Beacon() {
             { id: "captions",icon: "👂",  label: "Live Captions",  type: "hear", dot: "var(--hear)" },
             { id: "color",   icon: "🎨",  label: "Color Finder",   type: "vis",  dot: "var(--vis)"  },
             { id: "sound",   icon: "🔊",  label: "Sound View",     type: "hear", dot: "var(--hear)" },
+            { id: "about",      icon: "◎",  label: "About",      type: "vis", dot: "var(--vis)" },
+            { id: "references", icon: "§",  label: "References", type: "vis", dot: "var(--vis)" },
           ].map(({ id, icon, label, type, dot }) => (
             <button key={id}
               className={`ntab${tab === id ? ` ${type}-active` : ""}`}
@@ -1431,7 +1435,10 @@ export default function Beacon() {
               </div>
             </div>
           )}
+        {tab === "about"      && <About />}
+        {tab === "references" && <References />}
         </main>
+        
 
         <footer>
           Built for <strong>Kentucky TSA Software Development 2025</strong> · Beacon, Universal Accessibility Companion
